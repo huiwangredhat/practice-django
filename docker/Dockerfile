@@ -2,10 +2,11 @@ FROM registry.access.redhat.com/ubi8/python-38
 USER 0
 
 RUN yum -y install httpd git; yum clean all; systemctl enable httpd.service
+COPY  ./mysite/requirements/* /tmp
+RUN  pip install --upgrade pip && pip install -r /tmp/base.txt
 WORKDIR /opt/app-root/src
-RUN cd $WORKDIR  && \
-    git clone https://github.com/huiwangredhat/practice-django.git && \
-    cp  $WORKDIR/practice-django/mysite/requirements/* /tmp && \
+RUN git clone https://github.com/huiwangredhat/practice-django.git && \
+    cp  ./practice-django/mysite/requirements/* /tmp && \
     pip install --upgrade pip && pip install -r /tmp/base.txt --use-pep517 && \
     mkdir -p  /var/log/mysite/ && \
     mkdir /var/mysite && \
@@ -16,7 +17,7 @@ RUN cd $WORKDIR  && \
     chmod a+rwX -R /run/httpd/ /var/log/httpd/ /var/log/mysite/ /var/cache/ \
          /etc/passwd  /var/mysite && \
     mkdir -p /var/mysite/static && \
-    $WORKDIR/practice-django/mysite/manage.py collectstatic --noinput --clear --link
+    ./practice-django/mysite/manage.py collectstatic --noinput --clear --link
 
 EXPOSE 8080/tcp
 CMD ["/usr/sbin/init"]
